@@ -1,0 +1,41 @@
+================================================================================
+HEART DISEASE PREDICTION MODEL - DEPLOYMENT GUIDE
+================================================================================
+
+Model Name: xgboost
+
+Files Required for Deployment:
+  1. xgboost_model.pkl - Trained model
+  2. xgboost_scaler.pkl - Feature scaler
+  3. xgboost_features.json - Feature names and order
+
+Deployment Steps:
+  1. Load the model: model = joblib.load('xgboost_model.pkl')
+  2. Load the scaler: scaler = joblib.load('xgboost_scaler.pkl')
+  3. Load feature names: with open('xgboost_features.json') as f: features = json.load(f)
+  4. Preprocess input: X_scaled = scaler.transform(X_new)
+  5. Predict: predictions = model.predict(X_scaled)
+
+Example Usage:
+```python
+import joblib
+import json
+import numpy as np
+
+# Load model and scaler
+model = joblib.load('xgboost_model.pkl')
+scaler = joblib.load('xgboost_scaler.pkl')
+
+# Prepare new data (ensure features are in correct order)
+new_patient = np.array([[...]])  # Your feature values
+
+# Scale features
+new_patient_scaled = scaler.transform(new_patient)
+
+# Make prediction
+prediction = model.predict(new_patient_scaled)
+probability = model.predict_proba(new_patient_scaled)
+
+print(f'Prediction: {prediction[0]}')
+print(f'Disease Probability: {probability[0][1]:.2%}')
+```

@@ -1,0 +1,39 @@
+# Python cache
+__pycache__/
+*.pyc
+*.pyo
+*.pyd
+
+# Virtual environment
+.venv/
+.venv_stable/
+env/
+venv/
+
+# VS Code
+.vscode/
+
+# OS files
+.DS_Store
+Thumbs.db
+
+# Logs
+*.log
+
+# Model files (very important)
+# *.pkl
+# *.h5
+# *.json
+
+# # Output folder (generated results)
+# outputs/
+
+# # Large dataset (optional)
+# *.csv
+
+# Temporary files
+*.tmp
+*.bak
+
+# Environment variables
+.env

@@ -1,0 +1,354 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>CardioAI — Heart Disease Prediction</title>
+  <link rel="icon" href="data:image/svg+xml,<svg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 100 100'><text y='.9em' font-size='90'>🫀</text></svg>" />
+  <link rel="preconnect" href="https://fonts.googleapis.com" />
+  <link href="https://fonts.googleapis.com/css2?family=DM+Serif+Display:ital@0;1&family=DM+Sans:wght@300;400;500;600&display=swap" rel="stylesheet" />
+  <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.5.0/css/all.min.css" />
+  <link rel="stylesheet" href="style_advanced.css" />
+</head>
+<body>
+
+<!-- ░░ LOADING OVERLAY ░░ -->
+<div id="loadingOverlay" class="loading-overlay">
+  <div class="loading-inner">
+    <div class="pulse-ring"></div>
+    <i class="fas fa-heartbeat loading-icon"></i>
+  </div>
+  <p id="loadingMsg">Analysing patient data…</p>
+</div>
+
+<!-- ░░ SIDEBAR ░░ -->
+<aside class="sidebar">
+  <div class="brand">
+    <span class="brand-icon">🫀</span>
+    <span class="brand-name">CardioAI</span>
+  </div>
+
+  <nav class="sidenav">
+    <button class="nav-item active" data-section="predict">
+      <i class="fas fa-stethoscope"></i><span>Assessment</span>
+    </button>
+    <button class="nav-item" data-section="explain">
+      <i class="fas fa-microscope"></i><span>Explanations</span>
+    </button>
+    <button class="nav-item" data-section="insights">
+      <i class="fas fa-notes-medical"></i><span>Clinical Insights</span>
+    </button>
+    <button class="nav-item" data-section="about">
+      <i class="fas fa-flask"></i><span>Model Details</span>
+    </button>
+  </nav>
+
+  <div class="sidebar-footer">
+    <p>XGBoost · 86.5% accuracy</p>
+    <p class="disclaimer">Research use only</p>
+  </div>
+</aside>
+
+<!-- ░░ MAIN ░░ -->
+<main class="main">
+
+  <!-- ── ASSESSMENT ─────────────────────────────────────────── -->
+  <section id="predictSection" class="section active">
+    <header class="page-header">
+      <div>
+        <h1>Patient Risk Assessment</h1>
+        <p>Enter clinical parameters to receive an AI-powered cardiovascular risk prediction.</p>
+      </div>
+      <button class="sample-btn" onclick="loadSamplePatient()">
+        <i class="fas fa-user-injured"></i> Load Sample Patient
+      </button>
+    </header>
+
+    <div class="assess-grid">
+      <!-- form -->
+      <div class="card form-card">
+        <div class="card-title"><i class="fas fa-clipboard-list"></i> Patient Parameters</div>
+
+        <form id="predictionForm">
+          <div class="field-group-label">Demographics</div>
+          <div class="field-row">
+            <div class="field">
+              <label>Age <span class="unit">yrs</span></label>
+              <input type="number" id="age" min="18" max="120" value="55" required />
+            </div>
+            <div class="field">
+              <label>Biological Sex</label>
+              <select id="sex" required>
+                <option value="Male">Male</option>
+                <option value="Female">Female</option>
+              </select>
+            </div>
+          </div>
+
+          <div class="field-group-label">Cardiac Markers</div>
+          <div class="field-row">
+            <div class="field">
+              <label>Chest Pain Type</label>
+              <select id="chest_pain" required>
+                <option value="Typical Angina">Typical Angina</option>
+                <option value="Atypical Angina" selected>Atypical Angina</option>
+                <option value="Non-anginal Pain">Non-anginal Pain</option>
+                <option value="Asymptomatic">Asymptomatic</option>
+              </select>
+            </div>
+            <div class="field">
+              <label>Resting ECG</label>
+              <select id="resting_ecg" required>
+                <option value="Normal">Normal</option>
+                <option value="ST-T Abnormality">ST-T Abnormality</option>
+                <option value="LV Hypertrophy">LV Hypertrophy</option>
+              </select>
+            </div>
+          </div>
+
+          <div class="field-row">
+            <div class="field">
+              <label>Exercise Angina</label>
+              <select id="exercise_angina" required>
+                <option value="No">No</option>
+                <option value="Yes">Yes</option>
+              </select>
+            </div>
+            <div class="field">
+              <label>ST Slope</label>
+              <select id="st_slope" required>
+                <option value="Upsloping">Upsloping</option>
+                <option value="Flat" selected>Flat</option>
+                <option value="Downsloping">Downsloping</option>
+              </select>
+            </div>
+          </div>
+
+          <div class="field-group-label">Vitals &amp; Labs</div>
+          <div class="field-row three">
+            <div class="field">
+              <label>Resting BP <span class="unit">mm Hg</span></label>
+              <input type="number" id="restingbp_final" min="80" max="200" value="140" required />
+            </div>
+            <div class="field">
+              <label>Cholesterol <span class="unit">mg/dl</span></label>
+              <input type="number" id="chol_final" min="100" max="600" value="250" required />
+            </div>
+            <div class="field">
+              <label>Max Heart Rate <span class="unit">bpm</span></label>
+              <input type="number" id="maxhr_final" min="60" max="220" value="150" required />
+            </div>
+          </div>
+
+          <div class="field-row">
+            <div class="field">
+              <label>ST Depression <span class="unit">Oldpeak</span></label>
+              <input type="number" id="oldpeak" min="0" max="10" step="0.1" value="2.0" required />
+            </div>
+            <div class="field">
+              <label>Fasting Blood Sugar <span class="unit">&gt;120 mg/dl</span></label>
+              <select id="fasting_bs" required>
+                <option value="No">No</option>
+                <option value="Yes">Yes</option>
+              </select>
+            </div>
+          </div>
+
+          <button type="submit" class="predict-btn">
+            <i class="fas fa-brain"></i> Run Analysis
+          </button>
+        </form>
+      </div>
+
+      <!-- results -->
+      <div class="card result-card" id="resultCard">
+        <div class="card-title"><i class="fas fa-chart-pie"></i> Prediction Results</div>
+
+        <div id="resultsPlaceholder" class="placeholder-state">
+          <div class="placeholder-icon">🫀</div>
+          <p>Complete the form and click<br /><strong>Run Analysis</strong> to see results.</p>
+        </div>
+
+        <div id="predictionResults" style="display:none">
+          <!-- verdict -->
+          <div id="verdictBadge" class="verdict-badge"></div>
+
+          <!-- probability arc -->
+          <div class="prob-section">
+            <svg class="arc-svg" viewBox="0 0 200 120">
+              <path d="M 20 100 A 80 80 0 0 1 180 100" stroke="#e2e8f0" stroke-width="16" fill="none" stroke-linecap="round"/>
+              <path id="arcFill" d="M 20 100 A 80 80 0 0 1 180 100" stroke="#ef4444" stroke-width="16" fill="none"
+                    stroke-linecap="round" stroke-dasharray="251.2" stroke-dashoffset="251.2"
+                    style="transition:stroke-dashoffset 1.2s cubic-bezier(.4,0,.2,1), stroke 0.8s"/>
+              <text x="100" y="92" text-anchor="middle" class="arc-pct" id="arcPct">0%</text>
+              <text x="100" y="112" text-anchor="middle" class="arc-label">Disease Probability</text>
+            </svg>
+
+            <div class="ci-pill">
+              <i class="fas fa-bullseye"></i>
+              <span>95% CI: <strong id="ciText">—</strong></span>
+            </div>
+          </div>
+
+          <!-- risk + protective -->
+          <div class="factor-cols">
+            <div class="fcol risk-col">
+              <div class="fcol-header"><i class="fas fa-triangle-exclamation"></i> Risk Factors</div>
+              <ul id="riskList"></ul>
+            </div>
+            <div class="fcol prot-col">
+              <div class="fcol-header"><i class="fas fa-shield-heart"></i> Protective</div>
+              <ul id="protList"></ul>
+            </div>
+          </div>
+
+          <!-- cta row -->
+          <div class="cta-row">
+            <button class="cta-btn primary" onclick="showExplanations()">
+              <i class="fas fa-microscope"></i> View AI Explanations
+            </button>
+            <button class="cta-btn ghost" onclick="downloadReport()">
+              <i class="fas fa-file-arrow-down"></i> Export CSV
+            </button>
+          </div>
+        </div>
+      </div>
+    </div>
+  </section>
+
+  <!-- ── EXPLANATIONS ───────────────────────────────────────── -->
+  <section id="explainSection" class="section">
+    <header class="page-header">
+      <div>
+        <h1>AI Explanations</h1>
+        <p>Interpretability plots showing how each feature influenced the prediction.</p>
+      </div>
+    </header>
+
+    <div class="tab-bar">
+      <button class="tab active" data-tab="waterfall"><i class="fas fa-water"></i> Waterfall</button>
+      <button class="tab" data-tab="force"><i class="fas fa-arrows-left-right"></i> Force Plot</button>
+      <button class="tab" data-tab="lime"><i class="fas fa-lemon"></i> LIME</button>
+      <button class="tab" data-tab="summary"><i class="fas fa-chart-bar"></i> Global Summary</button>
+      <button class="tab" data-tab="importance"><i class="fas fa-list-ol"></i> Importance</button>
+    </div>
+
+    <!-- Waterfall -->
+    <div id="waterfallTab" class="tab-pane active">
+      <div class="card plot-card">
+        <div class="card-title">SHAP Waterfall — Individual Prediction</div>
+        <p class="card-sub">How each feature pushes the model output higher (red) or lower (blue).</p>
+        <div class="plot-wrap">
+          <img id="waterfallPlot" class="plot-img" alt="Waterfall" />
+          <div id="waterfallPh" class="plot-ph"><i class="fas fa-image"></i><p>Run a prediction first</p></div>
+        </div>
+      </div>
+    </div>
+
+    <!-- Force -->
+    <div id="forceTab" class="tab-pane">
+      <div class="card plot-card">
+        <div class="card-title">SHAP Force Plot</div>
+        <p class="card-sub">Cumulative feature impact — red increases risk, blue decreases it.</p>
+        <div class="plot-wrap">
+          <iframe id="forcePlotFrame" class="force-frame"></iframe>
+          <div id="forcePh" class="plot-ph"><i class="fas fa-image"></i><p>Run a prediction first</p></div>
+        </div>
+      </div>
+    </div>
+
+    <!-- LIME -->
+    <div id="limeTab" class="tab-pane">
+      <div class="card plot-card">
+        <div class="card-title">LIME — Local Interpretable Explanation</div>
+        <p class="card-sub">A simple local model fitted around this single prediction.</p>
+        <div class="plot-wrap">
+          <img id="limePlot" class="plot-img" alt="LIME" />
+          <div id="limePh" class="plot-ph"><i class="fas fa-lemon"></i><p>Run a prediction first</p></div>
+        </div>
+        <div id="limeWeights" style="display:none; padding:1rem">
+          <table id="limeTable" class="lime-table"></table>
+        </div>
+      </div>
+    </div>
+
+    <!-- Summary -->
+    <div id="summaryTab" class="tab-pane">
+      <div class="card plot-card">
+        <div class="card-title">Global SHAP Summary</div>
+        <p class="card-sub">Feature importance across a representative sample.</p>
+        <div class="plot-wrap" id="summaryWrap">
+          <img id="summaryPlot" class="plot-img" alt="Summary" />
+          <div id="summaryPh" class="plot-ph">
+            <button class="load-btn" onclick="loadSummaryPlot()"><i class="fas fa-sync"></i> Load Plot</button>
+          </div>
+        </div>
+      </div>
+    </div>
+
+    <!-- Importance -->
+    <div id="importanceTab" class="tab-pane">
+      <div class="card plot-card">
+        <div class="card-title">Feature Importance — Mean |SHAP|</div>
+        <p class="card-sub">Ranked features by average absolute impact.</p>
+        <div class="plot-wrap" id="importWrap">
+          <img id="importancePlot" class="plot-img" alt="Importance" />
+          <div id="importPh" class="plot-ph">
+            <button class="load-btn" onclick="loadImportancePlot()"><i class="fas fa-sync"></i> Load Plot</button>
+          </div>
+        </div>
+      </div>
+    </div>
+  </section>
+
+  <!-- ── CLINICAL INSIGHTS ──────────────────────────────────── -->
+  <section id="insightsSection" class="section">
+    <header class="page-header">
+      <div><h1>Clinical Insights</h1><p>Evidence-based guidance for cardiovascular risk reduction.</p></div>
+    </header>
+    <div class="insights-grid">
+      <div class="insight-card"><span class="ins-icon">🏃</span><h3>Physical Activity</h3><p>150 min/week of moderate aerobic activity reduces cardiovascular event risk by 35%.</p></div>
+      <div class="insight-card"><span class="ins-icon">🥗</span><h3>Diet</h3><p>Mediterranean diet with omega-3 rich foods lowers LDL and systemic inflammation.</p></div>
+      <div class="insight-card"><span class="ins-icon">🩺</span><h3>Blood Pressure</h3><p>Maintaining systolic BP below 130 mm Hg halves the risk of major cardiac events.</p></div>
+      <div class="insight-card"><span class="ins-icon">🧘</span><h3>Stress Management</h3><p>Chronic stress elevates cortisol and promotes arterial plaque formation.</p></div>
+      <div class="insight-card"><span class="ins-icon">🚭</span><h3>Smoking Cessation</h3><p>Quitting smoking reduces coronary heart disease risk by 50% within one year.</p></div>
+      <div class="insight-card"><span class="ins-icon">💊</span><h3>Medication Adherence</h3><p>Statins and antihypertensives are most effective with consistent, long-term use.</p></div>
+    </div>
+  </section>
+
+  <!-- ── MODEL DETAILS ──────────────────────────────────────── -->
+  <section id="aboutSection" class="section">
+    <header class="page-header">
+      <div><h1>Model Details</h1><p>Technical information about the underlying XGBoost classifier.</p></div>
+    </header>
+    <div class="about-grid">
+      <div class="card about-card">
+        <div class="card-title"><i class="fas fa-brain"></i> Algorithm</div>
+        <dl>
+          <dt>Model type</dt><dd>XGBoost Classifier</dd>
+          <dt>Training records</dt><dd>heart_disease.csv (UCI merged)</dd>
+          <dt>Validation</dt><dd>5-fold stratified CV</dd>
+          <dt>Explainability</dt><dd>SHAP TreeExplainer + LIME</dd>
+        </dl>
+      </div>
+      <div class="card about-card">
+        <div class="card-title"><i class="fas fa-chart-line"></i> Performance</div>
+        <dl>
+          <dt>Accuracy</dt><dd>86.5%</dd>
+          <dt>F1 Score</dt><dd>87.6%</dd>
+          <dt>Precision</dt><dd>86.9%</dd>
+          <dt>Recall</dt><dd>88.4%</dd>
+        </dl>
+      </div>
+      <div class="card about-card warn-card">
+        <div class="card-title"><i class="fas fa-triangle-exclamation"></i> Disclaimer</div>
+        <p>This tool is for <strong>research and educational purposes only</strong>. It does not constitute medical advice and must not be used as a substitute for professional clinical judgement. Always consult a qualified healthcare provider.</p>
+      </div>
+    </div>
+  </section>
+
+</main>
+
+<script src="script_advanced.js"></script>
+</body>
+</html>
