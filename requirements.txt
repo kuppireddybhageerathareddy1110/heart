@@ -1,30 +1,7 @@
-# Core Data Science Libraries
-numpy>=1.21.0
-pandas>=1.3.0
-matplotlib>=3.4.0
-seaborn>=0.11.0
-
-# Machine Learning
-scikit-learn>=1.0.0
-
-# Gradient Boosting Libraries
-xgboost>=1.5.0
-lightgbm>=3.3.0
-
-# Deep Learning
-tensorflow>=2.8.0
-
-# Explainable AI
-shap>=0.40.0
-lime>=0.2.0
-
-# Utilities
-joblib>=1.1.0
-
-# Optional (for better visualization)
-plotly>=5.0.0
-ipywidgets>=7.6.0
-
-
 fastapi
 uvicorn
+numpy
+pandas
+scikit-learn
+xgboost
+joblib
