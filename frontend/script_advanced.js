@@ -3,7 +3,7 @@
    ========================================================= */
 
 // const API = 'http://127.0.0.1:8001';
-const API_URL = "https://heart-ulet.onrender.com";
+const API = "https://heart-ulet.onrender.com";
 const state = { patient: null, prediction: null };
 
 /* ── navigation ─────────────────────────────────────────── */
